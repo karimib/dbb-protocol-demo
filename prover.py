@@ -1,45 +1,46 @@
 import random
 import socket
 import os
-import hmac
-import hashlib
-import time
 
-secret_key = b'supersecretkey'
-iterations = 10
+# If the verifier is running on a different machine, change the host to the IP address of the prover
+HOST = 'localhost'
+# Set the port to the same port as the prover (over 1024)
+PORT = 18080
+
+SECRET_KEY = b'supersecretkey'
+ITERATIONS = 10
 
 
 def main():
-    host = 'localhost'
-    port = 18080
-
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((host, port))
+    server_socket.bind((HOST, PORT))
     server_socket.listen(1)
-    print(f"Listening on {host}:{port}")
+    print(f"Listening on {HOST}:{PORT}")
 
     conn, addr = server_socket.accept()
     print(f"Connected by {addr}")
 
-    print("Start: Setup Phase")
+    print("=====================================")
+    print("⚙️Start: SETUP PHASE")
     verifier_nonce = conn.recv(128)
-    print("Received nonce N_v: ", verifier_nonce)
+    print("📥Received nonce N_v: ", verifier_nonce)
     prover_nonce = os.urandom(16)
     conn.sendall(prover_nonce)
-    print("Sent nonce: N_p: ", prover_nonce)
-    random.seed(secret_key + verifier_nonce + prover_nonce)
-    shared_bits = ''.join(str(random.randint(0, 1)) for _ in range(2*iterations))
-    print("Shared bits:", shared_bits)
-    print("End: Setup Phase")
+    print("📥Sent nonce: N_p: ", prover_nonce)
+    random.seed(SECRET_KEY + verifier_nonce + prover_nonce)
+    shared_bits = ''.join(str(random.randint(0, 1)) for _ in range(2 * ITERATIONS))
+    print("📦Shared bits b_n:", shared_bits)
+    print("⚙️End: SETUP PHASE")
+    print("=====================================")
 
     try:
-        for i in range(iterations):
+        for i in range(ITERATIONS):
             data = conn.recv(1)
-            # Extract nonce and challenge
-            challenge = int(data.decode())
-            print("Received challenge:", challenge)
-            r_i = shared_bits[(2 * i + challenge - 1)]
-            print("Generated response:", r_i)
+
+            c_i = int(data.decode())
+            # print("Received challenge:", challenge)
+            r_i = shared_bits[(2 * i + c_i - 1)]
+            # print("Generated response:", r_i)
             conn.send(str(r_i).encode())
 
     finally:

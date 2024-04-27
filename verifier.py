@@ -1,36 +1,45 @@
 import random
 import socket
 import os
-import hmac
-import hashlib
 import time
 
-secret_key = b'supersecretkey'
-iterations = 10
+# If the prover is running on a different machine, change the host to the IP address of the prover
+HOST = 'localhost'
+# Set the port to the same port as the prover (over 1024)
+PORT = 18080
+
+SECRET_KEY = b'supersecretkey'
+ITERATIONS = 10
+DISTANCE_THRESHOLD = 1000
+SPEED_OF_LIGHT = 299792458
 
 
 def main():
-    host = 'localhost'
-    port = 18080
-
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((host, port))
+    client_socket.connect((HOST, PORT))
 
-    wait = input("Press Enter to continue...")
-
-    print("Start: Setup Phase")
+    input("Press Enter to start: SETUP PHASE")
+    print("=====================================")
+    print("⚙️Start: SETUP PHASE")
     verifier_nonce = os.urandom(16)
     client_socket.sendall(verifier_nonce)
-    print(">Sent nonce N_v: ", verifier_nonce)
+    print("📥Sent nonce N_v: ", verifier_nonce)
     prover_nonce = client_socket.recv(128)
-    print("<Received nonce N_p: ", prover_nonce)
-    random.seed(secret_key + verifier_nonce + prover_nonce)
-    shared_bits = ''.join(str(random.randint(0, 1)) for _ in range(2*iterations))
-    print("Shared bits:", shared_bits)
-    print("End: Setup Phase")
+    print("📤Received nonce N_p: ", prover_nonce)
+    random.seed(SECRET_KEY + verifier_nonce + prover_nonce)
+    shared_bits = ''.join(str(random.randint(0, 1)) for _ in range(2 * ITERATIONS))
+    print("📦Shared bits b_n:", shared_bits)
+    print("🏁End: SETUP PHASE")
+    print("=====================================")
+
+    input("Press Enter to start: CHALLENGE PHASE")
+    print("=====================================")
+    print("⚙️Start: CHALLENGE PHASE")
 
     try:
-        for i in range(iterations):  # 10 challenge-response rounds
+        for i in range(ITERATIONS):
+            print("=====================================")
+            print("🚩ITERATION: ", i)
             c_i = random.randint(0, 1)
             print(">Sending challenge:", c_i)
 
@@ -39,20 +48,30 @@ def main():
             data = client_socket.recv(1)
             end_time = time.perf_counter_ns()
             expected_response = shared_bits[(2 * i + c_i - 1)]
-            print("<Received response:", data)
-            print("Expected response:", expected_response)
             response = str(int(data.decode()))
-
+            print("<Received response:", response)
+            print("=Expected response:", expected_response)
 
             if expected_response == response:
-                print("<Valid response received")
+                print("✅Valid response received")
             else:
-                print("<Invalid response or tampering detected")
+                print("❌Invalid response or tampering detected")
 
-            print("=Round trip time:", (end_time - start_time) / 1e6, "ms")
+            round_trip_time = (end_time - start_time) / 1e9
+            distance = ((round_trip_time / 2) * SPEED_OF_LIGHT)
+            print("=Round trip time:", round_trip_time, "ms")
+            print("=Distance: ", distance, "meters")
+            if distance < DISTANCE_THRESHOLD:
+                print("✅RESULT: Prover is within threshold distance")
+            else:
+                print("❌RESULT: Prover is outside threshold distance")
+
 
     finally:
         client_socket.close()
+
+    print("=====================================")
+    print("🏁End: CHALLENGE PHASE")
 
 
 if __name__ == "__main__":
