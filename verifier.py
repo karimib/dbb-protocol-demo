@@ -42,9 +42,9 @@ def main():
             print("🚩ITERATION: ", i)
             c_i = random.randint(0, 1)
             print(">Sending challenge:", c_i)
-
+            msg = str(c_i).encode()
             start_time = time.perf_counter_ns()
-            client_socket.send(str(c_i).encode())
+            client_socket.send(msg)
             data = client_socket.recv(1)
             end_time = time.perf_counter_ns()
             expected_response = shared_bits[(2 * i + c_i - 1)]
@@ -59,7 +59,7 @@ def main():
 
             round_trip_time = (end_time - start_time) / 1e9
             distance = ((round_trip_time / 2) * SPEED_OF_LIGHT)
-            print("=Round trip time:", round_trip_time, "ms")
+            print("=Round trip time:", round_trip_time, "s")
             print("=Distance: ", distance, "meters")
             if distance < DISTANCE_THRESHOLD:
                 print("✅RESULT: Prover is within threshold distance")
