@@ -21,16 +21,16 @@ def main():
     print(f"Connected by {addr}")
 
     print("=====================================")
-    print("⚙️Start: SETUP PHASE")
+    print("⚙️ Start: SETUP PHASE")
     verifier_nonce = conn.recv(128)
-    print("📥Received nonce N_v: ", verifier_nonce)
+    print("📥 Received nonce N_v: ", verifier_nonce)
     prover_nonce = os.urandom(16)
     conn.sendall(prover_nonce)
-    print("📥Sent nonce: N_p: ", prover_nonce)
+    print("📥 Sent nonce: N_p: ", prover_nonce)
     random.seed(SECRET_KEY + verifier_nonce + prover_nonce)
     shared_bits = ''.join(str(random.randint(0, 1)) for _ in range(2 * ITERATIONS))
-    print("📦Shared bits b_n:", shared_bits)
-    print("⚙️End: SETUP PHASE")
+    print("📦 Shared bits b_n:", shared_bits)
+    print("⚙️ End: SETUP PHASE")
     print("=====================================")
 
     try:

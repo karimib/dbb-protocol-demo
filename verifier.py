@@ -20,21 +20,21 @@ def main():
 
     input("Press Enter to start: SETUP PHASE")
     print("=====================================")
-    print("⚙️Start: SETUP PHASE")
+    print("⚙️ Start: SETUP PHASE")
     verifier_nonce = os.urandom(16)
     client_socket.sendall(verifier_nonce)
-    print("📥Sent nonce N_v: ", verifier_nonce)
+    print("📥 Sent nonce N_v: ", verifier_nonce)
     prover_nonce = client_socket.recv(128)
-    print("📤Received nonce N_p: ", prover_nonce)
+    print("📤 Received nonce N_p: ", prover_nonce)
     random.seed(SECRET_KEY + verifier_nonce + prover_nonce)
     shared_bits = ''.join(str(random.randint(0, 1)) for _ in range(2 * ITERATIONS))
-    print("📦Shared bits b_n:", shared_bits)
-    print("🏁End: SETUP PHASE")
+    print("📦 Shared bits b_n:", shared_bits)
+    print("🏁 End: SETUP PHASE")
     print("=====================================")
 
     input("Press Enter to start: CHALLENGE PHASE")
     print("=====================================")
-    print("⚙️Start: CHALLENGE PHASE")
+    print("⚙️ Start: CHALLENGE PHASE")
 
     try:
         for i in range(ITERATIONS):
@@ -53,18 +53,18 @@ def main():
             print("=Expected response:", expected_response)
 
             if expected_response == response:
-                print("✅Valid response received")
+                print("✅ Valid response received")
             else:
-                print("❌Invalid response or tampering detected")
+                print("❌ Invalid response or tampering detected")
 
             round_trip_time = (end_time - start_time) / 1e9
             distance = ((round_trip_time / 2) * SPEED_OF_LIGHT)
             print("=Round trip time:", round_trip_time, "s")
             print("=Distance: ", distance, "meters")
             if distance < DISTANCE_THRESHOLD:
-                print("✅RESULT: Prover is within threshold distance")
+                print("✅RESULT: Prover is within threshold")
             else:
-                print("❌RESULT: Prover is outside threshold distance")
+                print("❌RESULT: Prover is outside threshold")
 
 
     finally:
