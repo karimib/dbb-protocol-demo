@@ -8,7 +8,7 @@ HOST = 'localhost'
 PORT = 18080
 
 SECRET_KEY = b'supersecretkey'
-ITERATIONS = 10
+ITERATIONS = 10000
 
 
 def main():

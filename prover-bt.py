@@ -6,19 +6,21 @@ MAC = "XX:XX:XX:XX:XX:XX"
 PORT = 4
 
 SECRET_KEY = b'supersecretkey'
-ITERATIONS = 10
+ITERATIONS = 10000
 
 def main():
+    # Establish a Bluetooth connection with the verifier
     server_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
     server_socket.bind((MAC, PORT))
     server_socket.listen(1)
     print(f"Listening on {MAC}:{PORT}")
-
+    # Accept the connection
     conn, addr = server_socket.accept()
     print(f"Connected by {addr}")
 
     print("=====================================")
     print("⚙️ Start: SETUP PHASE")
+    # Receive the nonce from the verifier
     verifier_nonce = conn.recv(128)
     print("📥 Received nonce N_v: ", verifier_nonce)
     prover_nonce = os.urandom(16)
