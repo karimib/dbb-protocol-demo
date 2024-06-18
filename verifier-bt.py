@@ -2,6 +2,7 @@ import random
 import socket
 import os
 import time
+import csv
 
 SECRET_KEY = b'supersecretkey'
 ITERATIONS = 10
@@ -32,13 +33,12 @@ def main():
     input("Press Enter to start: CHALLENGE PHASE")
     print("=====================================")
     print("⚙️ Start: CHALLENGE PHASE")
-
+    received_responses = []
+    expected_responses = []
+    time_deltas = []
     try:
         for i in range(ITERATIONS):
-            print("=====================================")
-            print("🚩ITERATION: ", i)
             c_i = random.randint(0, 1)
-            print(">Sending challenge:", c_i)
             msg = str(c_i).encode()
 
             start_time = time.perf_counter_ns()
@@ -46,28 +46,33 @@ def main():
             data = client_socket.recv(1)
             end_time = time.perf_counter_ns()
 
-            expected_response = shared_bits[(2 * i + c_i - 1)]
-            response = str(int(data.decode()))
-            print("<Received response:", response)
-            print("=Expected response:", expected_response)
+            expected_responses.append(int(shared_bits[(2 * i + c_i - 1)]))
+            received_responses.append(int(data.decode()))
+            time_deltas.append(end_time - start_time)
 
-            if expected_response == response:
-                print("✅ Valid response received")
-            else:
-                print("❌ Invalid response or tampering detected")
+        print("=====================================")
+        print("🏁End: CHALLENGE PHASE")
+        print("⚙️ Start: VERIFICATION PHASE")
+        valid_responses = 0
+        valid_distance = 0
+        for i in range(ITERATIONS):
+            valid_responses += 1 if expected_responses[i] == received_responses[i] else 0
+            valid_distance += 1 if time_deltas[i] < 2 * DISTANCE_THRESHOLD else 0
 
-            round_trip_time = (end_time - start_time) / 1e9
-            distance = ((round_trip_time / 2) * SPEED_OF_LIGHT)
-            print("=Round trip time:", round_trip_time, "s")
-            print("=Distance: ", distance, "meters")
-            if distance < DISTANCE_THRESHOLD:
-                print("✅RESULT: Prover is within threshold")
-            else:
-                print("❌RESULT: Prover is outside threshold")
+        avg_rtt = sum(time_deltas) / len(time_deltas)
+        print("📊 Valid responses:", valid_responses)
+        print("📊 Valid distance:", valid_distance)
+        print("📊 Average round trip time (ns):", avg_rtt)
+        print("📊 Average distance (m):", avg_rtt * SPEED_OF_LIGHT)
 
+        with open('output-bt.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            # Write each row in the list to the file
+            for row in time_deltas:
+                writer.writerow([row])
 
     finally:
-        client_socket.close()
+            client_socket.close()
 
     print("=====================================")
     print("🏁End: CHALLENGE PHASE")
