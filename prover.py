@@ -36,12 +36,10 @@ def main():
     try:
         for i in range(ITERATIONS):
             data = conn.recv(1)
-
             c_i = int(data.decode())
-            # print("Received challenge:", challenge)
             r_i = shared_bits[(2 * i + c_i - 1)]
-            # print("Generated response:", r_i)
             conn.send(str(r_i).encode())
+
 
     finally:
         conn.close()

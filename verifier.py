@@ -46,10 +46,10 @@ def main():
             c_i = random.randint(0, 1)
             msg = str(c_i).encode()
 
-            start_time = time.perf_counter_ns()
+            start_time = time.process_time_ns()
             client_socket.send(msg)
             data = client_socket.recv(1)
-            end_time = time.perf_counter_ns()
+            end_time = time.process_time_ns()
 
             expected_responses.append(int(shared_bits[(2 * i + c_i - 1)]))
             received_responses.append(int(data.decode()))
