@@ -5,7 +5,7 @@ import os
 import time
 
 # If the prover is running on a different machine, change the host to the IP address of the prover
-HOST = 'localhost'
+HOST = '127.0.0.1'
 # Set the port to the same port as the prover (over 1024)
 PORT = 18080
 
@@ -45,11 +45,10 @@ def main():
         for i in range(ITERATIONS):
             c_i = random.randint(0, 1)
             msg = str(c_i).encode()
-
-            start_time = time.process_time_ns()
             client_socket.send(msg)
+            start_time = time.perf_counter_ns()
             data = client_socket.recv(1)
-            end_time = time.process_time_ns()
+            end_time = time.perf_counter_ns()
 
             expected_responses.append(int(shared_bits[(2 * i + c_i - 1)]))
             received_responses.append(int(data.decode()))
@@ -68,7 +67,7 @@ def main():
         print("📊 Valid responses:", valid_responses)
         print("📊 Valid distance:", valid_distance)
         print("📊 Average round trip time (ns):", avg_rtt)
-        print("📊 Average distance (m):", avg_rtt * SPEED_OF_LIGHT)
+        print("📊 Average distance (m):", (avg_rtt / 2) * SPEED_OF_LIGHT)
 
         with open('output.csv', 'w', newline='') as file:
             writer = csv.writer(file)

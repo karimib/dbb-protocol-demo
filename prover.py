@@ -3,7 +3,7 @@ import socket
 import os
 
 # If the verifier is running on a different machine, change the host to the IP address of the prover
-HOST = 'localhost'
+HOST = '127.0.0.1'
 # Set the port to the same port as the prover (over 1024)
 PORT = 18080
 
@@ -39,7 +39,6 @@ def main():
             c_i = int(data.decode())
             r_i = shared_bits[(2 * i + c_i - 1)]
             conn.send(str(r_i).encode())
-
 
     finally:
         conn.close()
