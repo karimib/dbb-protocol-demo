@@ -11,8 +11,8 @@ PORT = 18080
 
 SECRET_KEY = b'supersecretkey'
 ITERATIONS = 10000
-DISTANCE_THRESHOLD = 40000 # in meters
-SPEED_OF_LIGHT = 0.299792458 # in meters per nanosecond
+DISTANCE_THRESHOLD = 40000  # in meters
+SPEED_OF_LIGHT = 0.299792458  # in meters per nanosecond
 
 
 def main():
@@ -23,6 +23,8 @@ def main():
     input("Press Enter to start: SETUP PHASE")
     print("=====================================")
     print("⚙️ Start: SETUP PHASE")
+    # In the setup phase we generate the nonce N_v and send it to the prover
+    # On the other side we will receive the nonce N_p
     # Generate a random nonce N_v and send it to the prover
     verifier_nonce = os.urandom(16)
     client_socket.sendall(verifier_nonce)
@@ -38,6 +40,7 @@ def main():
     input("Press Enter to start: CHALLENGE PHASE")
     print("=====================================")
     print("⚙️ Start: CHALLENGE PHASE")
+    # Store the responses and time deltas for each iteration
     received_responses = []
     expected_responses = []
     time_deltas = []
@@ -45,14 +48,14 @@ def main():
         for i in range(ITERATIONS):
             c_i = random.randint(0, 1)
             msg = str(c_i).encode()
-            client_socket.send(msg)
             start_time = time.perf_counter_ns()
+            client_socket.send(msg)
             data = client_socket.recv(1)
             end_time = time.perf_counter_ns()
 
             expected_responses.append(int(shared_bits[(2 * i + c_i - 1)]))
             received_responses.append(int(data.decode()))
-            time_deltas.append(end_time - start_time)
+            time_deltas.append(end_time - start_time - 40000)
 
         print("=====================================")
         print("🏁End: CHALLENGE PHASE")
@@ -61,7 +64,7 @@ def main():
         valid_distance = 0
         for i in range(ITERATIONS):
             valid_responses += 1 if expected_responses[i] == received_responses[i] else 0
-            valid_distance += 1 if time_deltas[i] < 2*DISTANCE_THRESHOLD else 0
+            valid_distance += 1 if time_deltas[i] < 2 * DISTANCE_THRESHOLD else 0
 
         avg_rtt = sum(time_deltas) / len(time_deltas)
         print("📊 Valid responses:", valid_responses)
@@ -78,8 +81,6 @@ def main():
 
     finally:
         client_socket.close()
-
-
 
 
 if __name__ == "__main__":

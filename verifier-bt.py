@@ -8,12 +8,11 @@ SECRET_KEY = b'supersecretkey'
 ITERATIONS = 10
 DISTANCE_THRESHOLD = 40000
 SPEED_OF_LIGHT = 299792458
-MAC = "XX:XX:XX:XX:XX:XX"
-PORT = 4
+MAC = "XX:XX:XX:XX:XX:XX"  # Replace with the MAC address of the provers bluetooth device
+PORT = 4  # RFCOMM port number (1-32)
 
 
 def main():
-
     client_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
     client_socket.connect((MAC, PORT))
 
@@ -41,7 +40,6 @@ def main():
         for i in range(ITERATIONS):
             c_i = random.randint(0, 1)
             msg = str(c_i).encode()
-
             start_time = time.process_time_ns()
             client_socket.send(msg)
             data = client_socket.recv(1)
@@ -73,7 +71,7 @@ def main():
                 writer.writerow([row])
 
     finally:
-            client_socket.close()
+        client_socket.close()
 
     print("=====================================")
     print("🏁End: CHALLENGE PHASE")

@@ -32,7 +32,7 @@ def main():
     print("📦 Shared bits b_n:", shared_bits)
     print("⚙️ End: SETUP PHASE")
     print("=====================================")
-
+    # Challenge phase
     try:
         for i in range(ITERATIONS):
             data = conn.recv(1)
